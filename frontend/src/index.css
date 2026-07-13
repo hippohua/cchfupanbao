@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-color: #f2f3f5;
+    color: #333;
+    font-size: 13px;
+  }
+}
+
+@layer components {
+  .card-fpb {
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #e8e8e8;
+  }
+
+  .fpb-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .card-header-fpb {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title-fpb {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .card-title-fpb::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: #e4393c;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+
+  .table-fpb {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+  }
+
+  .table-fpb thead th {
+    background: #fafafa;
+    color: #666;
+    font-weight: 500;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .table-fpb tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f5f5f5;
+    color: #333;
+  }
+
+  .table-fpb tbody tr:hover {
+    background: #fafafa;
+  }
+
+  .text-up {
+    color: #e4393c;
+  }
+
+  .text-down {
+    color: #00aa3c;
+  }
+
+  .bg-up-light {
+    background: #fff1f0;
+  }
+
+  .bg-down-light {
+    background: #f0fdf4;
+  }
+
+  .badge-red {
+    background: #e4393c;
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+  }
+
+  .badge-green {
+    background: #00aa3c;
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+  }
+
+  .badge-gray {
+    background: #999;
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+  }
+
+  .tag-concept {
+    background: #fff2f0;
+    color: #e4393c;
+    border: 1px solid #ffccc7;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+
+  .bar-green {
+    background: #00aa3c;
+  }
+
+  .bar-red {
+    background: #e4393c;
+  }
+
+  .sidebar-item-active {
+    background: #fff1f0;
+    color: #e4393c;
+    border-right: 3px solid #e4393c;
+  }
+}

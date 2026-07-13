@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Backend secrets and local data
+backend/.env
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Logs and local editor state
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
