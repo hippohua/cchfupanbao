@@ -182,14 +182,62 @@ export const emotionTrendData = Array.from({ length: 20 }, (_, i) => ({
   boardRate: 30 + Math.random() * 50,
 }))
 
-// K线数据
-export const klineData = Array.from({ length: 30 }, (_, i) => {
-  const base = 3000
-  const open = base + (Math.random() - 0.5) * 100
-  const close = open + (Math.random() - 0.5) * 80
-  const high = Math.max(open, close) + Math.random() * 30
-  const low = Math.min(open, close) - Math.random() * 30
-  const volume = Math.floor(Math.random() * 5000) + 1000
-  const up = close >= open
-  return { date: i, open, close, high, low, volume, up }
-})
+// 上证指数日K数据
+export const shDailyKData = [
+  { date: '4-17', open: 4042, close: 4070, high: 4083, low: 4018, volume: 41 },
+  { date: '4-21', open: 4062, close: 4054, high: 4104, low: 4038, volume: 45 },
+  { date: '4-23', open: 4075, close: 4118, high: 4132, low: 4056, volume: 49 },
+  { date: '4-25', open: 4128, close: 4195, high: 4216, low: 4115, volume: 58 },
+  { date: '4-29', open: 4205, close: 4182, high: 4242, low: 4168, volume: 62 },
+  { date: '5-06', open: 4190, close: 4248, high: 4258.86, low: 4178, volume: 66 },
+  { date: '5-08', open: 4232, close: 4154, high: 4241, low: 4138, volume: 61 },
+  { date: '5-12', open: 4148, close: 4092, high: 4176, low: 4078, volume: 59 },
+  { date: '5-14', open: 4104, close: 4140, high: 4168, low: 4086, volume: 57 },
+  { date: '5-16', open: 4132, close: 4110, high: 4150, low: 4088, volume: 55 },
+  { date: '5-20', open: 4098, close: 4126, high: 4148, low: 4070, volume: 54 },
+  { date: '5-22', open: 4118, close: 4058, high: 4130, low: 4037, volume: 52 },
+  { date: '5-26', open: 4065, close: 4078, high: 4105, low: 4044, volume: 51 },
+  { date: '5-28', open: 4074, close: 4042, high: 4086, low: 4012, volume: 50 },
+  { date: '5-30', open: 4046, close: 3985, high: 4060, low: 3958, volume: 48 },
+  { date: '6-03', open: 3972, close: 3948, high: 3996, low: 3927.85, volume: 46 },
+  { date: '6-05', open: 3958, close: 4008, high: 4022, low: 3944, volume: 47 },
+  { date: '6-09', open: 4018, close: 4056, high: 4072, low: 4001, volume: 50 },
+  { date: '6-11', open: 4062, close: 4126, high: 4140, low: 4048, volume: 55 },
+  { date: '6-13', open: 4138, close: 4086, high: 4158, low: 4065, volume: 58 },
+  { date: '6-17', open: 4092, close: 4112, high: 4132, low: 4066, volume: 57 },
+  { date: '6-19', open: 4108, close: 4068, high: 4124, low: 4040, volume: 54 },
+  { date: '6-23', open: 4072, close: 4098, high: 4115, low: 4048, volume: 53 },
+  { date: '6-25', open: 4102, close: 4055, high: 4128, low: 4028, volume: 51 },
+  { date: '6-27', open: 4062, close: 4028, high: 4088, low: 3997, volume: 49 },
+  { date: '6-30', open: 4020, close: 3992, high: 4044, low: 3962, volume: 47 },
+  { date: '7-02', open: 3990, close: 3950, high: 4006, low: 3929, volume: 44 },
+  { date: '7-04', open: 3942, close: 4036.59, high: 4058, low: 3905, volume: 62 },
+]
+
+export const shIntradayData = [
+  { time: '09:30', price: 3977, volume: 304 },
+  { time: '09:35', price: 3982, volume: 235 },
+  { time: '09:45', price: 3972, volume: 180 },
+  { time: '09:55', price: 3984, volume: 151 },
+  { time: '10:05', price: 3976, volume: 126 },
+  { time: '10:15', price: 3979, volume: 112 },
+  { time: '10:25', price: 3971, volume: 98 },
+  { time: '10:35', price: 3962, volume: 87 },
+  { time: '10:45', price: 3953, volume: 82 },
+  { time: '10:55', price: 3946, volume: 78 },
+  { time: '11:05', price: 3937, volume: 74 },
+  { time: '11:15', price: 3948, volume: 72 },
+  { time: '11:25', price: 3966, volume: 70 },
+  { time: '13:05', price: 3958, volume: 83 },
+  { time: '13:15', price: 3974, volume: 95 },
+  { time: '13:25', price: 3988, volume: 78 },
+  { time: '13:35', price: 3996, volume: 85 },
+  { time: '13:45', price: 4011, volume: 92 },
+  { time: '13:55', price: 4018, volume: 88 },
+  { time: '14:05', price: 4029, volume: 97 },
+  { time: '14:15', price: 4036, volume: 101 },
+  { time: '14:25', price: 4048, volume: 96 },
+  { time: '14:35', price: 4065, volume: 112 },
+  { time: '14:45', price: 4058, volume: 126 },
+  { time: '14:55', price: 4036.59, volume: 172 },
+]

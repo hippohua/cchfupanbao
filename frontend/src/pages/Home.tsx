@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { BarChart3, CloudSun, ExternalLink, RotateCw } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { Activity, BarChart3, CandlestickChart, CloudSun, ExternalLink, RotateCw } from 'lucide-react'
 import {
   indexData, limitUpLadder, shortMarketData, sectorRanks, sectorLimitUpRanks,
-  shortMarketCategories, dragonTigerData, marketTrendTableData, emotionTrendData, klineData
+  shortMarketCategories, dragonTigerData, marketTrendTableData, emotionTrendData, shDailyKData, shIntradayData
 } from '../data/mock'
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
       <div className="grid grid-cols-12 gap-3 mt-3">
         <div className="col-span-7 space-y-3">
           <MarketUpDown />
-          <IndexKLine />
+          <IndexCharts />
           <MarketTrendChart />
         </div>
         <div className="col-span-5 space-y-3">
@@ -150,46 +150,213 @@ function MarketUpDown() {
   )
 }
 
-// ============ K线图 ============
-function IndexKLine() {
-  const maxPrice = Math.max(...klineData.map(d => d.high))
-  const minPrice = Math.min(...klineData.map(d => d.low))
-  const priceRange = maxPrice - minPrice
-  const maxVol = Math.max(...klineData.map(d => d.volume))
+// ============ 上证指数图表 ============
+function IndexCharts() {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <DailyKChart />
+      <IntradayChart />
+    </div>
+  )
+}
 
+function ChartCard({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
   return (
     <div className="card-fpb">
       <div className="card-header-fpb">
-        <span className="card-title-fpb">上证指数 000001</span>
-        <div className="text-xs text-gray-400">2997.56 <span className="text-down">-0.93%</span></div>
+        <span className="card-title-fpb flex items-center gap-1.5">
+          {icon}
+          {title}
+        </span>
+        <ExternalLink size={13} className="text-gray-300" />
       </div>
-      <div className="p-2">
-        {/* K线 */}
-        <div className="h-44 flex items-end gap-px px-2">
-          {klineData.map((d, i) => {
-            const top = ((maxPrice - Math.max(d.open, d.close)) / priceRange) * 100
-            const height = (Math.abs(d.close - d.open) / priceRange) * 100
-            const wickTop = ((maxPrice - d.high) / priceRange) * 100
-            const wickHeight = ((d.high - d.low) / priceRange) * 100
-            const color = d.up ? '#e4393c' : '#00aa3c'
-
-            return (
-              <div key={i} className="flex-1 relative" style={{ height: '100%' }}>
-                <div className="absolute w-px left-1/2 -translate-x-1/2" style={{ top: `${wickTop}%`, height: `${wickHeight}%`, background: color }} />
-                <div className="absolute w-3/5 left-1/2 -translate-x-1/2 rounded-sm" style={{ top: `${top}%`, height: `${Math.max(height, 1)}%`, background: color }} />
-              </div>
-            )
-          })}
-        </div>
-        {/* 成交量 */}
-        <div className="h-14 mt-1 flex items-end gap-px px-2 border-t border-gray-100 pt-1">
-          {klineData.map((d, i) => (
-            <div key={i} className="flex-1 rounded-sm" style={{ height: `${(d.volume / maxVol) * 100}%`, background: d.up ? '#e4393c' : '#00aa3c', opacity: 0.6 }} />
-          ))}
-        </div>
-      </div>
+      {children}
     </div>
   )
+}
+
+function DailyKChart() {
+  const width = 560
+  const priceHeight = 250
+  const volumeHeight = 82
+  const pad = { left: 16, right: 74, top: 22, bottom: 28 }
+  const chartWidth = width - pad.left - pad.right
+  const prices = shDailyKData.flatMap((item) => [item.high, item.low])
+  const maxPrice = Math.max(...prices)
+  const minPrice = Math.min(...prices)
+  const priceRange = maxPrice - minPrice
+  const maxVol = Math.max(...shDailyKData.map((item) => item.volume))
+  const step = chartWidth / shDailyKData.length
+  const y = (price: number) => pad.top + ((maxPrice - price) / priceRange) * (priceHeight - pad.top - pad.bottom)
+  const volTop = priceHeight + 14
+  const ma5 = movingAverage(shDailyKData.map((item) => item.close), 5)
+  const ma10 = movingAverage(shDailyKData.map((item) => item.close), 10)
+  const ma20 = movingAverage(shDailyKData.map((item) => item.close), 20)
+  const linePoints = (values: (number | null)[]) =>
+    values
+      .map((value, index) => value === null ? '' : `${pad.left + index * step + step / 2},${y(value)}`)
+      .filter(Boolean)
+      .join(' ')
+
+  return (
+    <ChartCard title="上证指数 日K线" icon={<CandlestickChart size={15} className="text-[#e4393c]" />}>
+      <div className="p-3">
+        <svg viewBox={`0 0 ${width} ${priceHeight + volumeHeight + 30}`} className="w-full h-[360px]">
+          {[0, 1, 2, 3, 4, 5].map((tick) => {
+            const yy = pad.top + tick * ((priceHeight - pad.top - pad.bottom) / 5)
+            const price = maxPrice - tick * (priceRange / 5)
+            return (
+              <g key={tick}>
+                <line x1={pad.left} y1={yy} x2={width - pad.right} y2={yy} stroke="#edf0f5" strokeDasharray="3 3" />
+                <text x={width - pad.right + 8} y={yy + 4} className="chart-axis-text">{price.toFixed(2)}</text>
+              </g>
+            )
+          })}
+          <line x1={width - pad.right} y1={pad.top} x2={width - pad.right} y2={priceHeight - pad.bottom} stroke="#d9dee7" />
+          <line x1={pad.left} y1={priceHeight - pad.bottom} x2={width - pad.right} y2={priceHeight - pad.bottom} stroke="#d9dee7" />
+
+          <polyline points={linePoints(ma5)} fill="none" stroke="#2f80ed" strokeWidth="1.2" />
+          <polyline points={linePoints(ma10)} fill="none" stroke="#f59e0b" strokeWidth="1.2" />
+          <polyline points={linePoints(ma20)} fill="none" stroke="#8b5cf6" strokeWidth="1.2" />
+
+          {shDailyKData.map((item, index) => {
+            const x = pad.left + index * step + step / 2
+            const up = item.close >= item.open
+            const color = up ? '#ef4444' : '#16a34a'
+            const bodyTop = y(Math.max(item.open, item.close))
+            const bodyHeight = Math.max(Math.abs(y(item.open) - y(item.close)), 2)
+            return (
+              <g key={item.date}>
+                <line x1={x} y1={y(item.high)} x2={x} y2={y(item.low)} stroke={color} strokeWidth="1" />
+                <rect x={x - step * 0.28} y={bodyTop} width={step * 0.56} height={bodyHeight} fill={color} />
+              </g>
+            )
+          })}
+
+          <text x={pad.left + 132} y={y(4258.86) - 6} className="chart-note">4,258.86</text>
+          <path d={`M ${pad.left + 147} ${y(4258.86) - 2} l -12 0 l 0 7`} stroke="#667085" fill="none" />
+          <text x={pad.left + 235} y={y(3927.85) + 18} className="chart-note">3,927.85</text>
+          <path d={`M ${pad.left + 285} ${y(3927.85) + 12} l 12 0 l 0 -7`} stroke="#667085" fill="none" />
+
+          <line x1={pad.left} y1={y(4036.59)} x2={width - pad.right} y2={y(4036.59)} stroke="#ef4444" strokeDasharray="4 4" />
+          <rect x={width - pad.right} y={y(4036.59) - 12} width="64" height="24" rx="2" fill="#dc2626" />
+          <text x={width - pad.right + 8} y={y(4036.59) + 4} fill="#fff" fontSize="12" fontWeight="700">4,036.59</text>
+
+          <line x1={pad.left} y1={volTop - 4} x2={width - pad.right} y2={volTop - 4} stroke="#d9dee7" />
+          {shDailyKData.map((item, index) => {
+            const x = pad.left + index * step + step / 2
+            const up = item.close >= item.open
+            const barHeight = (item.volume / maxVol) * (volumeHeight - 20)
+            return (
+              <rect
+                key={`${item.date}-vol`}
+                x={x - step * 0.25}
+                y={volTop + volumeHeight - barHeight}
+                width={step * 0.5}
+                height={barHeight}
+                fill={up ? '#ef4444' : '#16a34a'}
+                opacity="0.65"
+              />
+            )
+          })}
+          <text x={width - pad.right + 8} y={volTop + 18} className="chart-axis-text">70B</text>
+          <text x={width - pad.right + 8} y={volTop + 52} className="chart-axis-text">40B</text>
+          <text x={width - pad.right + 8} y={volTop + 78} className="chart-axis-text">10B</text>
+          <text x={pad.left} y={priceHeight + volumeHeight + 24} className="chart-axis-text">4-17</text>
+          <text x={pad.left + chartWidth * 0.24} y={priceHeight + volumeHeight + 24} className="chart-axis-text">2026-05-14</text>
+          <text x={pad.left + chartWidth * 0.53} y={priceHeight + volumeHeight + 24} className="chart-axis-text">2026-06-05</text>
+          <text x={pad.left + chartWidth * 0.82} y={priceHeight + volumeHeight + 24} className="chart-axis-text">2026-06-30</text>
+        </svg>
+      </div>
+    </ChartCard>
+  )
+}
+
+function IntradayChart() {
+  const width = 560
+  const height = 360
+  const pad = { left: 58, right: 42, top: 34, bottom: 38 }
+  const priceHeight = 230
+  const volTop = 256
+  const prices = shIntradayData.map((item) => item.price)
+  const maxPrice = Math.max(...prices)
+  const minPrice = Math.min(...prices)
+  const prevClose = 3970.88
+  const priceRange = maxPrice - minPrice
+  const maxVol = Math.max(...shIntradayData.map((item) => item.volume))
+  const chartWidth = width - pad.left - pad.right
+  const x = (index: number) => pad.left + (index / (shIntradayData.length - 1)) * chartWidth
+  const y = (price: number) => pad.top + ((maxPrice - price) / priceRange) * (priceHeight - pad.top)
+  const points = shIntradayData.map((item, index) => `${x(index)},${y(item.price)}`).join(' ')
+  const avgPoints = shIntradayData
+    .map((_, index) => {
+      const slice = shIntradayData.slice(0, index + 1)
+      const avg = slice.reduce((sum, item) => sum + item.price, 0) / slice.length
+      return `${x(index)},${y(avg)}`
+    })
+    .join(' ')
+
+  return (
+    <ChartCard title="上证指数 分时走势" icon={<Activity size={15} className="text-[#e4393c]" />}>
+      <div className="p-3">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[360px]">
+          {[0, 1, 2, 3, 4, 5].map((tick) => {
+            const yy = pad.top + tick * ((priceHeight - pad.top) / 5)
+            const price = maxPrice - tick * (priceRange / 5)
+            const pct = ((price - prevClose) / prevClose) * 100
+            return (
+              <g key={tick}>
+                <line x1={pad.left} y1={yy} x2={width - pad.right} y2={yy} stroke="#e8edf3" />
+                <text x={pad.left - 44} y={yy + 4} className="chart-axis-text">{price.toFixed(2)}</text>
+                <text x={width - pad.right + 7} y={yy + 4} className={pct >= 0 ? 'chart-axis-up' : 'chart-axis-down'}>{pct > 0 ? '+' : ''}{pct.toFixed(2)}%</text>
+              </g>
+            )
+          })}
+          <line x1={pad.left} y1={y(prevClose)} x2={width - pad.right} y2={y(prevClose)} stroke="#ef4444" strokeDasharray="4 4" />
+          <line x1={pad.left} y1={priceHeight + 5} x2={width - pad.right} y2={priceHeight + 5} stroke="#d9dee7" />
+          <polyline points={avgPoints} fill="none" stroke="#f59e0b" strokeDasharray="4 5" strokeWidth="1.2" />
+          <polyline points={points} fill="none" stroke="#3b82f6" strokeWidth="2" />
+          <circle cx={x(11)} cy={y(shIntradayData[11].price)} r="3" fill="#10b981" />
+          <text x={x(11) - 16} y={y(shIntradayData[11].price) + 18} fill="#10b981" fontSize="12" fontWeight="700">-0.80%</text>
+          <circle cx={x(22)} cy={y(shIntradayData[22].price)} r="3" fill="#ef4444" />
+          <text x={x(22) - 6} y={y(shIntradayData[22].price) - 10} fill="#ef4444" fontSize="12" fontWeight="700">+1.75%</text>
+          <text x={pad.left - 48} y={y(prevClose) + 4} fill="#ef4444" fontSize="12" fontWeight="700">+0.17%</text>
+          <text x={width - pad.right + 7} y={y(prevClose) + 4} fill="#98a2b3" fontSize="12" fontWeight="700">0.00%</text>
+
+          <line x1={pad.left} y1={volTop} x2={width - pad.right} y2={volTop} stroke="#d9dee7" />
+          {shIntradayData.map((item, index) => {
+            const barHeight = (item.volume / maxVol) * 82
+            const up = index === 0 || item.price >= shIntradayData[index - 1].price
+            return (
+              <rect
+                key={item.time}
+                x={x(index) - 4}
+                y={volTop + 96 - barHeight}
+                width="5"
+                height={barHeight}
+                fill={up ? '#ef4444' : '#22c55e'}
+                opacity="0.75"
+              />
+            )
+          })}
+          <text x={pad.left - 45} y={volTop + 12} className="chart-axis-text">303.8亿</text>
+          <text x={pad.left - 45} y={volTop + 52} className="chart-axis-text">151.9亿</text>
+          <text x={pad.left - 24} y={volTop + 92} className="chart-axis-text">0亿</text>
+          <text x={pad.left} y={height - 8} className="chart-axis-text">09:30</text>
+          <text x={pad.left + chartWidth * 0.46} y={height - 8} className="chart-axis-text">11:30  13:00</text>
+          <text x={width - pad.right - 24} y={height - 8} className="chart-axis-text">15:00</text>
+        </svg>
+      </div>
+    </ChartCard>
+  )
+}
+
+function movingAverage(values: number[], size: number) {
+  return values.map((_, index) => {
+    if (index + 1 < size) return null
+    const slice = values.slice(index + 1 - size, index + 1)
+    return slice.reduce((sum, value) => sum + value, 0) / size
+  })
 }
 
 // ============ 大盘走势 ============
