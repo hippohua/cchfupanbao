@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { Activity, BarChart3, CandlestickChart, CloudSun, ExternalLink, RotateCw } from 'lucide-react'
 import {
   indexData, limitUpLadder, shortMarketData, sectorRanks, sectorLimitUpRanks,
-  shortMarketCategories, dragonTigerData, marketTrendTableData, emotionTrendData, shDailyKData, shIntradayData
+  shortMarketCategories, dragonTigerData, marketTrendTableData, emotionTrendData, shDailyKData, shIntradayData,
+  thsThemeFundInflow, thsThemeFundOutflow, eastMoneyThemeFlow
 } from '../data/mock'
 
 export default function Home() {
@@ -30,6 +31,12 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-3 mt-3">
         <SectorRankTable />
         <SectorLimitUpTable />
+      </div>
+
+      {/* 题材资金 */}
+      <div className="grid grid-cols-2 gap-3 mt-3">
+        <ThemeFundRank />
+        <EastMoneyThemeFlow />
       </div>
 
       {/* 复盘海报 */}
@@ -670,6 +677,141 @@ function SectorLimitUpTable() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  )
+}
+
+// ============ 题材资金榜 ============
+function ThemeFundRank() {
+  const maxAmount = Math.max(...thsThemeFundInflow.map((item) => item.amount))
+  const middleItems = thsThemeFundInflow.slice(0, 14)
+
+  return (
+    <div className="card-fpb">
+      <div className="card-header-fpb">
+        <span className="card-title-fpb flex items-center gap-1.5">
+          <BarChart3 size={15} className="text-[#e4393c]" />
+          题材资金榜（同花顺）
+        </span>
+        <ExternalLink size={13} className="text-gray-300" />
+      </div>
+      <div className="p-3">
+        <div className="flex items-center gap-4 text-xs mb-3">
+          <button className="text-[#e4393c] border-b-2 border-[#e4393c] pb-2 font-medium">净额榜</button>
+          <button className="text-slate-700 pb-2">成交榜</button>
+        </div>
+        <div className="grid grid-cols-[1fr_1.05fr_1fr] gap-3">
+          <FundRankTable title="净流入" items={thsThemeFundInflow} positive />
+          <div className="space-y-2 pt-2">
+            {middleItems.map((item, index) => (
+              <div key={item.name} className="grid grid-cols-[72px_1fr_48px] items-center gap-2 text-xs">
+                <span className="truncate text-right text-slate-500">{item.name}</span>
+                <div className="h-4 bg-[#f3f4f6] rounded-sm overflow-hidden flex">
+                  <div
+                    className="bg-[#e62427]"
+                    style={{ width: `${Math.max(12, item.amount / maxAmount * 92)}%` }}
+                  />
+                  <div className="w-2 bg-[#16a34a]" />
+                </div>
+                <span className="truncate text-slate-400">{thsThemeFundOutflow[index]?.name || ''}</span>
+              </div>
+            ))}
+          </div>
+          <FundRankTable title="净流出" items={thsThemeFundOutflow} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FundRankTable({
+  title,
+  items,
+  positive = false,
+}: {
+  title: string
+  items: { name: string; amount: number; change: number; marketValue: string }[]
+  positive?: boolean
+}) {
+  return (
+    <div className="border border-[#e5e7eb] rounded-md overflow-hidden">
+      <table className="table-fpb">
+        <thead>
+          <tr>
+            <th>{title}</th>
+            <th className="w-16 text-right">净额</th>
+            <th className="w-16 text-right">涨跌幅</th>
+            <th className="w-20 text-right">总市值</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr key={item.name}>
+              <td className="font-medium">{item.name}</td>
+              <td className={`text-right font-mono ${positive ? 'text-up' : 'text-down'}`}>
+                {positive ? item.amount : item.amount}亿
+              </td>
+              <td className={`text-right font-mono ${item.change >= 0 ? 'text-up' : 'text-down'}`}>
+                {item.change > 0 ? '+' : ''}{item.change.toFixed(2)}%
+              </td>
+              <td className="text-right font-mono">{item.marketValue}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// ============ 题材资金流向 ============
+function EastMoneyThemeFlow() {
+  const maxAbs = Math.max(...eastMoneyThemeFlow.flatMap((item) => [item.inflow, Math.abs(item.outflow)]))
+
+  return (
+    <div className="card-fpb">
+      <div className="card-header-fpb">
+        <span className="card-title-fpb flex items-center gap-1.5">
+          <BarChart3 size={15} className="text-[#e4393c]" />
+          题材资金流向（东财）
+        </span>
+        <ExternalLink size={13} className="text-gray-300" />
+      </div>
+      <div className="p-4">
+        <div className="space-y-4">
+          {eastMoneyThemeFlow.map((item) => (
+            <div key={item.name} className="grid grid-cols-[110px_1fr_120px] items-center gap-2 text-xs">
+              <div className="text-right text-slate-700 truncate">{item.name} <span className="font-mono">{item.inflow.toFixed(2)}亿</span></div>
+              <div className="h-4 flex items-center bg-[linear-gradient(to_right,transparent_calc(50%-1px),#e5e7eb_calc(50%-1px),#e5e7eb_calc(50%+1px),transparent_calc(50%+1px))]">
+                <div className="w-1/2 flex justify-end">
+                  <div
+                    className="h-4 bg-[#e62427] rounded-l-sm"
+                    style={{ width: `${item.inflow / maxAbs * 100}%` }}
+                  />
+                </div>
+                <div className="w-1/2">
+                  <div
+                    className="h-4 bg-[#16a34a] rounded-r-sm"
+                    style={{ width: `${Math.abs(item.outflow) / maxAbs * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="text-slate-700 truncate">{item.outflowName} <span className="font-mono">{item.outflow.toFixed(2)}亿</span></div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <button className="px-3 py-1 rounded bg-[#fff1f0] text-[#e4393c] font-semibold">柱状</button>
+            <button className="px-3 py-1 rounded bg-gray-100">折线</button>
+            <button className="px-3 py-1 rounded bg-[#fff1f0] text-[#e4393c] font-semibold">20</button>
+            <button className="px-3 py-1 rounded bg-gray-100">40</button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>当前时刻 15:00</span>
+            <button className="px-3 py-1 rounded bg-[#e4393c] text-white">播放</button>
+          </div>
+        </div>
       </div>
     </div>
   )

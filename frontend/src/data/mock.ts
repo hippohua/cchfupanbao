@@ -63,6 +63,45 @@ export const sectorLimitUpRanks = [
   { name: '半导体', count: 2, change: 0.98 },
 ]
 
+export const thsThemeFundInflow = [
+  { name: '芯片概念', amount: 813, change: 3.22, marketValue: '37.90万亿' },
+  { name: '融资融券', amount: 690, change: 0.78, marketValue: '120.79万亿' },
+  { name: '半导体', amount: 396, change: 6.52, marketValue: '15.15万亿' },
+  { name: '存储芯片', amount: 376, change: 6.10, marketValue: '13.86万亿' },
+  { name: '5G', amount: 356, change: 2.44, marketValue: '18.92万亿' },
+  { name: '深股通', amount: 355, change: 0.71, marketValue: '44.54万亿' },
+  { name: '汽车电子', amount: 349, change: 2.65, marketValue: '13.85万亿' },
+  { name: '消费电子概念', amount: 331, change: 2.60, marketValue: '14.26万亿' },
+  { name: '共封装光学(CPO)', amount: 325, change: 4.35, marketValue: '13.57万亿' },
+  { name: '先进封装', amount: 299, change: 5.53, marketValue: '9.95万亿' },
+]
+
+export const thsThemeFundOutflow = [
+  { name: '风电', amount: -55, change: 0.26, marketValue: '11.33万亿' },
+  { name: '小金属概念', amount: -45, change: -0.52, marketValue: '6.02万亿' },
+  { name: '高股息精选', amount: -43, change: -0.90, marketValue: '30.11万亿' },
+  { name: '核电', amount: -28, change: 0.61, marketValue: '7.43万亿' },
+  { name: '煤化工概念', amount: -25, change: -0.67, marketValue: '4.15万亿' },
+  { name: '金属铜', amount: -25, change: -0.63, marketValue: '3.54万亿' },
+  { name: '氢能源', amount: -22, change: 0.40, marketValue: '10.81万亿' },
+  { name: '雅下水电概念', amount: -22, change: -0.94, marketValue: '2.39万亿' },
+  { name: '电力', amount: -21, change: -0.18, marketValue: '3.71万亿' },
+  { name: '黄金概念', amount: -20, change: -0.15, marketValue: '3.04万亿' },
+]
+
+export const eastMoneyThemeFlow = [
+  { name: '电子', inflow: 438.80, outflowName: '电池技术', outflow: -159.27 },
+  { name: '国产芯片', inflow: 397.01, outflowName: '锂电池概念', outflow: -131.83 },
+  { name: '半导体概念', inflow: 341.41, outflowName: '电力设备', outflow: -96.76 },
+  { name: '半导体', inflow: 318.68, outflowName: '固态电池', outflow: -93.41 },
+  { name: '存储芯片', inflow: 294.62, outflowName: '有色金属', outflow: -91.43 },
+  { name: '通信技术', inflow: 261.69, outflowName: '小金属概念', outflow: -78.36 },
+  { name: '人工智能', inflow: 211.52, outflowName: '储能概念', outflow: -66.47 },
+  { name: '算力概念', inflow: 203.05, outflowName: '风能', outflow: -60.65 },
+  { name: '物联网', inflow: 199.44, outflowName: '光伏概念', outflow: -54.87 },
+  { name: '5G概念', inflow: 194.89, outflowName: '新能源汽车', outflow: -50.92 },
+]
+
 export const shortMarketCategories = [
   {
     title: '一字板',
