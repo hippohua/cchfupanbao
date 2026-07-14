@@ -22,6 +22,7 @@ export default function Home() {
           <LimitUpLadderTable />
           <ShortMarketStats />
           <EmotionTrendChart />
+          <ShortMarketSection />
         </div>
       </div>
 
@@ -33,9 +34,6 @@ export default function Home() {
 
       {/* 复盘海报 */}
       <PosterSection />
-
-      {/* 短线市场 */}
-      <ShortMarketSection />
 
       {/* 龙虎榜 */}
       <DragonTigerSection />
@@ -719,7 +717,7 @@ function ShortMarketSection() {
   const activeCategory = shortMarketCategories.find(c => c.title === activeTab) || shortMarketCategories[0]
 
   return (
-    <div className="card-fpb mt-3">
+    <div className="card-fpb">
       <div className="card-header-fpb">
         <span className="card-title-fpb">短线市场总览</span>
       </div>
