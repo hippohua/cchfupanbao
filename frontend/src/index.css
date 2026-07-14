@@ -78,6 +78,64 @@
     background: #fafafa;
   }
 
+  .market-trend-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: #1f2937;
+  }
+
+  .market-trend-table th,
+  .market-trend-table td {
+    height: 39px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    padding: 3px 6px;
+    background: #fff;
+  }
+
+  .market-trend-table th {
+    width: 76px;
+    background: #fafafa;
+    font-weight: 600;
+    color: #111827;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  .market-trend-table .phase-shock {
+    background: #c99122;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .market-trend-table .phase-ebb {
+    background: #3f3f3f;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .market-trend-table .date-cell {
+    font-weight: 500;
+    color: #1f2937;
+  }
+
+  .market-emotion {
+    display: inline-flex;
+    min-width: 64px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border-radius: 1px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
   .text-up {
     color: #e4393c;
   }

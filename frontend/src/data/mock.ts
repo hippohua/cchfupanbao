@@ -160,15 +160,19 @@ export const dragonTigerData = {
   ]
 }
 
-// 大盘走势数据（模拟最近20个交易日）
-export const marketTrendData = Array.from({ length: 20 }, (_, i) => {
-  const up = Math.random() > 0.45
-  return {
-    date: `07/${String(i + 1).padStart(2, '0')}`,
-    upCount: up ? Math.floor(2000 + Math.random() * 1500) : Math.floor(500 + Math.random() * 1000),
-    downCount: up ? Math.floor(500 + Math.random() * 1000) : Math.floor(2000 + Math.random() * 1500),
-  }
-})
+// 大盘趋势数据（近10个交易日复盘对比）
+export const marketTrendTableData = [
+  { date: '6月26日', phase: '震荡期', forecast: '-', actual: '批量跌停', boardHeight: 3, limitUp: 109, firstLimit: 100, continued: 9, limitDown: 41, upRate: 45.70, turnover: '3.52万亿', volumeChange: -0.98, comment: '平量强分歧' },
+  { date: '6月27日', phase: '震荡期', forecast: '强分歧', actual: '弱修复', boardHeight: 3, limitUp: 121, firstLimit: 106, continued: 15, limitDown: 16, upRate: 51.82, turnover: '3.44万亿', volumeChange: -2.27, comment: '缩量修复' },
+  { date: '6月30日', phase: '震荡期', forecast: '弱转强', actual: '弱转强', boardHeight: 3, limitUp: 141, firstLimit: 120, continued: 21, limitDown: 7, upRate: 56.38, turnover: '3.27万亿', volumeChange: -6.94, comment: '大幅缩量' },
+  { date: '7月1日', phase: '震荡期', forecast: '弱分歧', actual: '弱转强', boardHeight: 3, limitUp: 154, firstLimit: 128, continued: 24, limitDown: 8, upRate: 79.11, turnover: '2.88万亿', volumeChange: -12.14, comment: '爆量上涨' },
+  { date: '7月2日', phase: '退潮期', forecast: '弱分歧', actual: '批量跌停', boardHeight: 4, limitUp: 91, firstLimit: 71, continued: 18, limitDown: 41, upRate: 41.16, turnover: '2.70万亿', volumeChange: -6.08, comment: '缩量退潮' },
+  { date: '7月3日', phase: '退潮期', forecast: '批量跌停', actual: '弱修复', boardHeight: 5, limitUp: 105, firstLimit: 92, continued: 12, limitDown: 22, upRate: 70.05, turnover: '3.18万亿', volumeChange: 17.81, comment: '缩量修复' },
+  { date: '7月6日', phase: '退潮期', forecast: '弱转强', actual: '强分歧', boardHeight: 4, limitUp: 66, firstLimit: 60, continued: 6, limitDown: 48, upRate: 34.63, turnover: '3.09万亿', volumeChange: -2.87, comment: '缩量强分歧' },
+  { date: '7月7日', phase: '退潮期', forecast: '弱转强', actual: '弱修复', boardHeight: 3, limitUp: 73, firstLimit: 64, continued: 9, limitDown: 36, upRate: 38.12, turnover: '2.96万亿', volumeChange: -4.21, comment: '弱修复' },
+  { date: '7月8日', phase: '退潮期', forecast: '弱修复', actual: '小幅上涨', boardHeight: 4, limitUp: 88, firstLimit: 75, continued: 13, limitDown: 21, upRate: 52.64, turnover: '3.04万亿', volumeChange: 2.70, comment: '缩量反弹' },
+  { date: '7月9日', phase: '退潮期', forecast: '小幅上涨', actual: '弱分歧', boardHeight: 5, limitUp: 25, firstLimit: 15, continued: 10, limitDown: 5, upRate: 33.80, turnover: '3.09万亿', volumeChange: -2.87, comment: '退潮延续' },
+]
 
 // 情绪走势数据
 export const emotionTrendData = Array.from({ length: 20 }, (_, i) => ({

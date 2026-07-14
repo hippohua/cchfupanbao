@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { BarChart3, CloudSun, ExternalLink, RotateCw } from 'lucide-react'
 import {
   indexData, limitUpLadder, shortMarketData, sectorRanks, sectorLimitUpRanks,
-  shortMarketCategories, dragonTigerData, marketTrendData, emotionTrendData, klineData
+  shortMarketCategories, dragonTigerData, marketTrendTableData, emotionTrendData, klineData
 } from '../data/mock'
 
 export default function Home() {
@@ -74,16 +75,66 @@ function MarketUpDown() {
   const down = 2790
   const flat = 205
   const total = up + down + flat
-  const upPct = (up / total * 100).toFixed(1)
-  const downPct = (down / total * 100).toFixed(1)
-  const flatPct = (flat / total * 100).toFixed(1)
+  const upPctNum = up / total * 100
+  const downPctNum = down / total * 100
+  const flatPctNum = flat / total * 100
+  const upPct = upPctNum.toFixed(1)
+  const downPct = downPctNum.toFixed(1)
+  const flatPct = flatPctNum.toFixed(1)
+  const shIndex = indexData.find((idx) => idx.code === '000001') || indexData[0]
+  const limitUp = Number(shortMarketData.find((item) => item.label === '涨停')?.value.replace(/\D/g, '') || 0)
+  const limitDown = Number(shortMarketData.find((item) => item.label === '跌停')?.value.replace(/\D/g, '') || 0)
+  const sealRate = Number(shortMarketData.find((item) => item.label === '封板率')?.value.replace('%', '') || 0)
+  const hotScore = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(upPctNum * 0.45 + sealRate * 0.28 + limitUp * 0.35 - limitDown * 0.8 + (shIndex.change >= 0 ? 7 : -7))
+    )
+  )
+  const marketStage = hotScore >= 75 ? '高潮期' : hotScore >= 58 ? '回暖期' : hotScore >= 42 ? '震荡期' : '退潮期'
+  const stageDescription = {
+    高潮期: '指数与赚钱效应共振，短线情绪高位活跃，留意一致后的分歧。',
+    回暖期: '指数企稳，涨停与封板率改善，适合围绕主线做强弱切换。',
+    震荡期: '多空拉锯，局部题材有表现，仓位和节奏比方向更重要。',
+    退潮期: '指数高开后承压，下跌家数占优，短线情绪转弱，优先控制回撤。',
+  }[marketStage]
+  const scoreColor = hotScore >= 58 ? 'text-up' : hotScore >= 42 ? 'text-orange-500' : 'text-slate-900'
 
   return (
     <div className="card-fpb">
       <div className="card-header-fpb">
-        <span className="card-title-fpb">涨跌家数</span>
+        <span className="card-title-fpb flex items-center gap-1.5">
+          <CloudSun size={15} className="text-[#e4393c]" />
+          大盘天气
+        </span>
+        <RotateCw size={13} className="text-gray-300" />
       </div>
       <div className="p-3">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2 py-0.5 rounded border border-gray-300 text-xs font-semibold text-gray-700 bg-white">
+                {marketStage}
+              </span>
+              <span className="text-xs text-gray-600 truncate">{stageDescription}</span>
+            </div>
+            <div className="grid grid-cols-5 gap-x-5 gap-y-1 text-xs text-gray-500">
+              <span>上证：<b className={shIndex.change >= 0 ? 'text-up' : 'text-down'}>{shIndex.value.toFixed(2)} {shIndex.change >= 0 ? '+' : ''}{shIndex.change.toFixed(2)}%</b></span>
+              <span>上涨：<b className="text-up">{up}</b></span>
+              <span>跌停：<b className="text-down">{limitDown}</b></span>
+              <span>涨停：<b className="text-up">{limitUp}</b></span>
+              <span>封板率：<b className={sealRate >= 60 ? 'text-up' : 'text-down'}>{sealRate.toFixed(2)}%</b></span>
+              <span>下跌：<b className="text-down">{down}</b></span>
+              <span>平盘：<b className="text-gray-500">{flat}</b></span>
+              <span className="col-span-3">量能：<b className="text-slate-900">3.09万亿</b> <b className="text-down">(-2.87%，缩量913亿)</b></span>
+            </div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className={`text-[30px] leading-8 font-bold font-mono ${scoreColor}`}>{hotScore}</div>
+            <div className="text-xs text-gray-400 mt-1">市场热度</div>
+          </div>
+        </div>
         <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
           <span>上涨 <span className="text-up font-bold text-sm">{up}</span> 只</span>
           <span>平盘 <span className="text-gray-400 font-bold text-sm">{flat}</span> 只</span>
@@ -143,30 +194,87 @@ function IndexKLine() {
 
 // ============ 大盘走势 ============
 function MarketTrendChart() {
-  const maxCount = Math.max(...marketTrendData.map(d => Math.max(d.upCount, d.downCount)))
+  const phaseGroups = marketTrendTableData.reduce((groups, item) => {
+    const last = groups[groups.length - 1]
+    if (last?.phase === item.phase) {
+      last.count += 1
+    } else {
+      groups.push({ phase: item.phase, count: 1 })
+    }
+    return groups
+  }, [] as { phase: string; count: number }[])
+
+  const emotionClass = (value: string) => {
+    if (value === '-') return 'text-gray-500'
+    if (value.includes('批量跌停')) return 'bg-[#3f3f3f] text-white'
+    if (value.includes('弱转强')) return 'bg-[#f85b5b] text-white'
+    if (value.includes('强分歧')) return 'bg-[#35b881] text-white'
+    if (value.includes('弱修复')) return 'bg-[#ffb4b4] text-[#7f1d1d]'
+    if (value.includes('弱分歧')) return 'bg-[#f5e7a4] text-[#6b5d00]'
+    if (value.includes('小幅上涨')) return 'bg-[#ffd0d0] text-[#ef4444]'
+    return 'bg-gray-100 text-gray-700'
+  }
+
+  const metricClass = (value: number, mode: 'up' | 'down' | 'neutral' = 'neutral') => {
+    if (mode === 'up') return value >= 0 ? 'text-up' : 'text-down'
+    if (mode === 'down') return value >= 30 ? 'text-down' : 'text-slate-700'
+    return value >= 50 ? 'text-up' : 'text-slate-700'
+  }
+
+  const rows = [
+    { label: '预测情绪', render: (item: typeof marketTrendTableData[number]) => <span className={`market-emotion ${emotionClass(item.forecast)}`}>{item.forecast}</span> },
+    { label: '实际情绪', render: (item: typeof marketTrendTableData[number]) => <span className={`market-emotion ${emotionClass(item.actual)}`}>{item.actual}</span> },
+    { label: '连板高度', render: (item: typeof marketTrendTableData[number]) => <span className={item.boardHeight >= 5 ? 'text-up font-semibold' : 'text-[#19b600] font-semibold'}>{item.boardHeight}</span> },
+    { label: '涨停数', render: (item: typeof marketTrendTableData[number]) => <span className="text-up font-mono font-semibold">{item.limitUp}</span> },
+    { label: '首板个数', render: (item: typeof marketTrendTableData[number]) => <span className="font-mono">{item.firstLimit}</span> },
+    { label: '连板数', render: (item: typeof marketTrendTableData[number]) => <span className={`${item.continued >= 18 ? 'text-up' : item.continued <= 8 ? 'text-down' : 'text-slate-700'} font-mono font-semibold`}>{item.continued}</span> },
+    { label: '跌停数', render: (item: typeof marketTrendTableData[number]) => <span className={`${metricClass(item.limitDown, 'down')} font-mono font-semibold`}>{item.limitDown}</span> },
+    { label: '上涨比率', render: (item: typeof marketTrendTableData[number]) => <span className={`${metricClass(item.upRate)} font-mono font-semibold`}>{item.upRate.toFixed(2)}%</span> },
+    { label: '量能', render: (item: typeof marketTrendTableData[number]) => <span className="text-up font-mono font-semibold">{item.turnover}</span> },
+    { label: '量能涨幅', render: (item: typeof marketTrendTableData[number]) => <span className={`${metricClass(item.volumeChange, 'up')} font-mono`}>{item.volumeChange > 0 ? '+' : ''}{item.volumeChange.toFixed(2)}%</span> },
+    { label: '点评', render: (item: typeof marketTrendTableData[number]) => <span className="text-slate-700 whitespace-nowrap">{item.comment}</span> },
+  ]
 
   return (
     <div className="card-fpb">
       <div className="card-header-fpb">
-        <span className="card-title-fpb">大盘走势</span>
+        <span className="card-title-fpb flex items-center gap-1.5">
+          <BarChart3 size={15} className="text-[#e4393c]" />
+          大盘趋势
+        </span>
+        <ExternalLink size={13} className="text-gray-300" />
       </div>
-      <div className="p-2">
-        <div className="h-32 flex items-end gap-1 px-2">
-          {marketTrendData.map((d, i) => {
-            const upH = (d.upCount / maxCount) * 100
-            const downH = (d.downCount / maxCount) * 100
-            return (
-              <div key={i} className="flex-1 flex flex-col justify-end gap-px">
-                <div className="w-full rounded-t-sm" style={{ height: `${upH}%`, background: '#e4393c', opacity: 0.8 }} />
-                <div className="w-full rounded-b-sm" style={{ height: `${downH}%`, background: '#00aa3c', opacity: 0.8 }} />
-              </div>
-            )
-          })}
-        </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-1 px-2">
-          <span>{marketTrendData[0].date}</span>
-          <span>{marketTrendData[marketTrendData.length - 1].date}</span>
-        </div>
+      <div className="p-3 overflow-x-auto">
+        <table className="market-trend-table min-w-[880px]">
+          <tbody>
+            <tr>
+              <th>阶段</th>
+              {phaseGroups.map((group) => (
+                <td
+                  key={`${group.phase}-${group.count}`}
+                  colSpan={group.count}
+                  className={group.phase === '震荡期' ? 'phase-shock' : 'phase-ebb'}
+                >
+                  {group.phase}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <th>日期</th>
+              {marketTrendTableData.map((item) => (
+                <td key={item.date} className="date-cell">{item.date}</td>
+              ))}
+            </tr>
+            {rows.map((row) => (
+              <tr key={row.label}>
+                <th>{row.label}</th>
+                {marketTrendTableData.map((item) => (
+                  <td key={`${row.label}-${item.date}`}>{row.render(item)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
