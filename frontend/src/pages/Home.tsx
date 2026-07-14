@@ -21,11 +21,9 @@ export default function Home() {
         <div className="col-span-5 space-y-3">
           <LimitUpLadderTable />
           <ShortMarketStats />
+          <EmotionTrendChart />
         </div>
       </div>
-
-      {/* 情绪走势 */}
-      <EmotionTrendChart />
 
       {/* 板块排名 */}
       <div className="grid grid-cols-2 gap-3 mt-3">
@@ -518,21 +516,36 @@ function ShortMarketStats() {
     if (color === 'blue') return 'text-blue-500'
     return 'text-orange-500'
   }
+  const statValue = (label: string) => shortMarketData.find((item) => item.label === label)?.value || '-'
+  const toNumber = (label: string) => Number(statValue(label).replace(/[^\d.-]/g, '')) || 0
+  const limitUp = toNumber('涨停')
+  const limitDown = toNumber('跌停')
+  const boardCount = toNumber('连板数')
+  const maxBoard = toNumber('最高连板')
+  const sealRate = toNumber('封板率')
+  const conclusion = limitUp < 35 || sealRate < 70
+    ? `短线情绪偏弱，涨停仅${limitUp}家、跌停${limitDown}家，封板率${sealRate.toFixed(2)}%，连板高度压到${maxBoard}板，适合降低试错频率。`
+    : `短线情绪保持活跃，涨停${limitUp}家、连板${boardCount}家，封板率${sealRate.toFixed(2)}%，可围绕高辨识度主线做跟踪。`
 
   return (
     <div className="card-fpb">
       <div className="card-header-fpb">
         <span className="card-title-fpb">短线市场</span>
       </div>
-      <div className="p-3 grid grid-cols-2 gap-2">
-        {shortMarketData.map((item, idx) => (
-          <div key={idx} className="flex justify-between items-center py-1 border-b border-gray-50 last:border-0">
-            <span className="text-xs text-gray-500">{item.label}</span>
-            <span className={`text-xs font-bold ${getColor(item.color)}`}>
-              {item.value}
-            </span>
-          </div>
-        ))}
+      <div className="p-3">
+        <div className="grid grid-cols-2 gap-2">
+          {shortMarketData.map((item, idx) => (
+            <div key={idx} className="flex justify-between items-center py-1 border-b border-gray-50 last:border-0">
+              <span className="text-xs text-gray-500">{item.label}</span>
+              <span className={`text-xs font-bold ${getColor(item.color)}`}>
+                {item.value}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 rounded bg-[#fff7f7] border border-[#fee2e2] px-3 py-2 text-xs leading-5 text-gray-700">
+          <span className="font-semibold text-[#e4393c]">结论：</span>{conclusion}
+        </div>
       </div>
     </div>
   )
@@ -540,8 +553,18 @@ function ShortMarketStats() {
 
 // ============ 情绪走势 ============
 function EmotionTrendChart() {
+  const latest = emotionTrendData[emotionTrendData.length - 1]
+  const previous = emotionTrendData[emotionTrendData.length - 2]
+  const limitUpDelta = latest.limitUpRate - previous.limitUpRate
+  const sealDelta = latest.sealRate - previous.sealRate
+  const boardDelta = latest.boardRate - previous.boardRate
+  const weakSignals = [limitUpDelta, sealDelta, boardDelta].filter((value) => value < 0).length
+  const conclusion = weakSignals >= 2
+    ? `尾端三项指标中有${weakSignals}项走弱，短线情绪仍在降温，优先观察封板率能否重新拐头。`
+    : `尾端情绪指标开始修复，封板率${sealDelta >= 0 ? '回升' : '小幅回落'}，需要继续观察连板率是否同步走强。`
+
   return (
-    <div className="card-fpb mt-3">
+    <div className="card-fpb">
       <div className="card-header-fpb">
         <span className="card-title-fpb">短线情绪走势</span>
       </div>
@@ -579,6 +602,9 @@ function EmotionTrendChart() {
           <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 rounded" /> 涨停率</span>
           <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-500 rounded" /> 封板率</span>
           <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-yellow-500 rounded" /> 连板率</span>
+        </div>
+        <div className="mt-3 rounded bg-[#f8fafc] border border-[#e5e7eb] px-3 py-2 text-xs leading-5 text-gray-700">
+          <span className="font-semibold text-slate-900">结论：</span>{conclusion}
         </div>
       </div>
     </div>
